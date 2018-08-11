@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<script type="text/javascript" src="socket.io/socket.io.js"></script>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<script type="text/javascript">
+		var socket = io.connect();
+		var sendername="";
+
+		socket.on('sendername', function(data){
+			sendername=data.name;
+			console.log(data);
+		});
+
+
+
+		
+		socket.on("online", function(data){
+			console.log(data);
+			$('.list-group').html("");
+			$.each(data.arr, function(key, value){
+				if(sendername==key)
+					var a = "<a href='#' class='list-group-item'>"+key+"(you)</a>";
+				else
+					var a = "<a href='#' class='list-group-item' onclick='selectuser(this)'>"+key+"</a>";
+				$(".list-group").append(a);
+			});
+		});
+		var selecteduser="";
+
+		function selectuser(element)
+		{
+			selecteduser=element.innerHTML;
+			$("#user").html(selecteduser);
+			
+		}
+
+		function send()
+		{
+
+			var data = { sendername : sendername,  recname : selecteduser, msg :  $("#msg").val() }
+			socket.emit("msg", data);
+		}
+
+		socket.on("message", function(data){
+			console.log(data);
+			var x = "<p><b>"+data.sender+"</b> : "+data.msg+"</p>";
+			$("#msg-box").append(x);
+			$("#msg").val("");
+		});
+
+	</script>
+</head>
+<body>
+	<div class="container">
+		<BR />
+		<br />
+		
+			
+		<div class="col-md-3 col-md-offset-1">
+			<div class="panel panel-primary">
+				<div class="panel-heading">
+					<h3>Chat Box</h3>
+				</div>
+				<div class="panel-body">
+					<label>Online User</label>
+					<div class="list-group">
+					  
+					</div>
+					<br />
+		
+				</div>
+			</div>
+		</div>
+		<div class="col-md-6 col-md-offset-1">
+			<div class="panel panel-success">
+				<div class="panel-heading">
+					<h3>Your Messages</h3>
+					<p>Chat With : <b id="user"></b></p>
+				</div>
+				<div class="panel-body">
+					<div id="msg-box" style="width: 100%; min-height: 400px; overflow-y: scroll;"></div>			
+				</div>
+				<div class="panel-footer">
+					<input type="text" class="form-control" id="msg" placeholder="Your Message">
+					<Br />
+					<button class="btn btn-success" onclick="send()">Send</button>
+				</div>
+			</div>
+		</div>
+		
+	</div>
+</body>
+</html>
